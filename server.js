@@ -1,6 +1,8 @@
 import React from "react";
 import ReactPDF from "@react-pdf/renderer";
 import Template from "./templates/Template";
+import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
 
 import express from "express";
 
@@ -25,14 +27,19 @@ app.post("/create", async (req, res) => {
             },
         };
 
-        // Simulación de un retraso asincrónico para mostrar el concepto
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
         // Genera un UUID para el nombre del PDF
-        const uuid = Math.floor(Math.random() * 1000000000);
+        const uuid = uuidv4();
+
+        // Directorio donde se guardará el PDF
+        const pdfDirectory = `${__dirname}/pdf-generated`;
+
+        // Verificar si el directorio existe, y si no, créalo
+        if (!fs.existsSync(pdfDirectory)) {
+            fs.mkdirSync(pdfDirectory);
+        }
 
         // Guarda el PDF localmente
-        const pdfPath = `${__dirname}/pdf-generated/example${uuid}.pdf`;
+        const pdfPath = `${pdfDirectory}/example-${uuid}.pdf`;
 
         // Create PDF file
         ReactPDF.render(
@@ -49,6 +56,7 @@ app.post("/create", async (req, res) => {
         // Respuesta al cliente (opcional)
         res.send("PDF generado y guardado localmente.");
     } catch (error) {
+        console.error(error);
         res.status(500).send("Error interno al generar o guardar el PDF");
     }
 });
